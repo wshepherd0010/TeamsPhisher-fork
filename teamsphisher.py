@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import argparse
 import requests
@@ -389,31 +389,6 @@ def createThread(skypeToken, senderInfo, targetInfo):
 
     return threadID
 
-def removeExternalUser(skypeToken, senderInfo, threadID, targetInfo):
-    headers = {
-        "Authentication": "skypetoken=" + skypeToken,
-        "User-Agent": useragent,
-        "Content-Type": "application/json",
-        "Origin": "https://teams.microsoft.com",
-        "Referer": "https://teams.microsoft.com/"
-    }
-
-    # Get the current thread information
-    response = requests.get(f"https://amer.ng.msg.teams.microsoft.com/v1/threads/{threadID}", headers=headers)
-    if response.status_code != 200:
-        p_warn("Error retrieving thread information: %d" % (response.status_code))
-        return None
-
-    thread = response.json()
-
-    # Delete the target user from the thread
-    content = requests.delete(f"https://amer.ng.msg.teams.microsoft.com/v1/threads/{threadID}/members/{targetInfo.get('mri')}", headers=headers)
-    if content.status_code != 204 and content.status_code != 200:
-        p_warn("Error removing user: %d" % (content.status_code))
-        p_warn(content.text)
-        return None
-
-
 def sendFile(skypeToken, threadID, senderInfo, targetInfo, inviteInfo, senderSharepointURL, senderDrive, attachment, message, personalize, nogreeting):
 
     # Sending a real message to a target
@@ -800,7 +775,6 @@ if __name__ == "__main__":
                     if inviteInfo:
                         # Send attacker-defined message to target with file sharing URL    
                         success = sendFile(skypeToken, threadID, senderInfo, targetInfo, inviteInfo, senderSharepointURL, senderDrive, args.attachment, args.message, args.personalize, args.nogreeting)
-                        removeExternalUser(skypeToken, senderInfo, threadID, targetInfo)
                     else:
                         numFailed += 1
                         continue
